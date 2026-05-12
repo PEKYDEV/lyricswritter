@@ -401,28 +401,28 @@ export function createEditorApp() {
         onPaste(event) {
             event.preventDefault();
             const text = event.clipboardData.getData('text/plain');
-            const lines = text.split(/\r?\n/);
-            const selection = window.getSelection();
-
-            if (!selection.rangeCount) {
+            if (!text) {
                 return;
             }
 
-            const range = selection.getRangeAt(0);
-            range.deleteContents();
+            // Kijelölt szöveg törlése
+            const selection = window.getSelection();
+            if (selection && !selection.isCollapsed) {
+                document.execCommand('delete', false);
+            }
 
-            const fragment = document.createDocumentFragment();
-            lines.forEach((line, i) => {
-                const div = document.createElement('div');
-                div.textContent = line || '';
-                if (!line) {
-                    div.appendChild(document.createElement('br'));
+            // execCommand-dal illesztjük be: a böngésző így helyesen kezeli a div-struktúrát
+            // és új sort (insertParagraph) mindig a megfelelő szinten hoz létre
+            const lines = text.split(/\r?\n/);
+            for (let i = 0; i < lines.length; i++) {
+                if (i > 0) {
+                    document.execCommand('insertParagraph', false);
                 }
-                fragment.appendChild(div);
-            });
+                if (lines[i]) {
+                    document.execCommand('insertText', false, lines[i]);
+                }
+            }
 
-            range.insertNode(fragment);
-            selection.collapseToEnd();
             this.onEditorInput();
         },
 
