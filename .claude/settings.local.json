@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__laravel-boost__application-info",
+      "Bash(php artisan *)",
+      "Bash(npm install *)",
+      "Bash(vendor/bin/pint *)",
+      "Bash(npm run *)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://lyricwriter.test\" -UseBasicParsing -TimeoutSec 5 2>&1 | Select-Object StatusCode, StatusDescription)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:8000\" -UseBasicParsing -TimeoutSec 5 2>&1 | Select-Object StatusCode, StatusDescription)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ]
+}

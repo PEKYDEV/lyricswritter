@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* Nothing Dot Matrix / Ndot 55 font */
+@font-face {
+    font-family: 'NothingFont';
+    src:
+        url('/fonts/Ndot-55.otf') format('opentype'),
+        url('/fonts/Ndot-55.ttf') format('truetype'),
+        url('/fonts/NothingDotMatrix.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@theme {
+    --font-sans: 'NothingFont', 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+/* ---- Meleg bézs/barna színpaletta ---- */
+:root {
+    --c-bg:          #f4ede3;
+    --c-sidebar:     #ece5db;
+    --c-panel:       #e5ddd2;
+    --c-text:        #2b1d0e;
+    --c-muted:       #7a6a58;
+    --c-faint:       #b5a898;
+    --c-border:      #d4c9bc;
+    --c-hover:       #e0d8ce;
+    --c-active-bg:   #2b1d0e;
+    --c-active-text: #f4ede3;
+    --c-input-bg:    #ede7dc;
+    --c-caret:       #2b1d0e;
+}
+
+.dark {
+    --c-bg:          #1e1610;
+    --c-sidebar:     #261d16;
+    --c-panel:       #2e2318;
+    --c-text:        #ece5db;
+    --c-muted:       #8a7a68;
+    --c-faint:       #574840;
+    --c-border:      #3d2f24;
+    --c-hover:       #2e2318;
+    --c-active-bg:   #ece5db;
+    --c-active-text: #1e1610;
+    --c-input-bg:    #261d16;
+    --c-caret:       #ece5db;
+}
+
+/* ---- Alapok ---- */
+*,
+*::before,
+*::after {
+    border-radius: 0 !important;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'NothingFont', 'JetBrains Mono', 'IBM Plex Mono', monospace;
+}
+
+body {
+    background: var(--c-bg);
+    color: var(--c-text);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ---- Szerkesztő terület ---- */
+#lyric-editor {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    outline: none;
+    min-height: 100%;
+    color: var(--c-text);
+    background: var(--c-bg);
+    caret-color: var(--c-caret);
+    /* Bal gutter: sorszám + szótagszám + elválasztó vonal */
+    padding-left: 80px;
+    background-image: linear-gradient(to right, transparent 74px, var(--c-border) 74px, var(--c-border) 75px, transparent 75px);
+    background-attachment: local;
+}
+
+#lyric-editor > div {
+    position: relative;
+    min-height: 1.7em;
+}
+
+/* Sorszám — bal gutter, mindig látható */
+#lyric-editor > div::before {
+    content: attr(data-line);
+    position: absolute;
+    left: -76px;
+    width: 24px;
+    text-align: right;
+    font-size: 10px;
+    /* line-height az editor szövegével azonos abszolút értékre állítva (15px * 1.7),
+       különben a kisebb betűméret miatt pár pixellel feljebb látszana */
+    line-height: calc(15px * 1.7);
+    color: var(--c-faint);
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.6;
+}
+
+/* Szótagszám — jobb oldala a gutter-nek */
+#lyric-editor > div::after {
+    content: attr(data-syl);
+    position: absolute;
+    left: -48px;
+    width: 26px;
+    text-align: right;
+    font-size: 11px;
+    line-height: calc(15px * 1.7);
+    color: var(--c-faint);
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* BPM-alapú szótagszám-szín */
+#lyric-editor > div[data-rating="ok"]::after      { color: #6a9a5a; }
+#lyric-editor > div[data-rating="warning"]::after  { color: #b08030; }
+#lyric-editor > div[data-rating="danger"]::after   { color: #b84040; }
+
+.dark #lyric-editor > div[data-rating="ok"]::after      { color: #8abf70; }
+.dark #lyric-editor > div[data-rating="warning"]::after  { color: #d4a855; }
+.dark #lyric-editor > div[data-rating="danger"]::after   { color: #d47070; }
+
+/* Rímséma jelvény (jobb oldali oszlopban marad) */
+.rhyme-badge {
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--c-muted);
+    user-select: none;
+    pointer-events: none;
+    font-family: 'NothingFont', 'JetBrains Mono', monospace;
+    line-height: 1.7;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--c-border); }
+
+/* ---- Transition ---- */
+.transition-fast { transition: all 150ms ease; }
+
+/* ---- Toolbar szeparátor ---- */
+.toolbar-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--c-border);
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* ---- Dropdown ---- */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--c-sidebar);
+    border: 1px solid var(--c-border);
+    min-width: 140px;
+    z-index: 50;
+}
+
+/* ---- Belső rím kiemelés ---- */
+.internal-rhyme {
+    border-radius: 2px !important;
+    padding: 0 2px;
+}
