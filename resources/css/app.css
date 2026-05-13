@@ -99,16 +99,15 @@ body {
     min-height: calc(15px * 1.7);
 }
 
-/* Sorszám — bal gutter */
+/* Sorszám — bal gutter, mindig látható */
 #lyric-editor > div::before {
     content: attr(data-line);
     position: absolute;
     left: -76px;
-    top: 0;
     width: 24px;
-    line-height: calc(15px * 1.7);
     text-align: right;
     font-size: 10px;
+    line-height: calc(15px * 1.7);
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;
@@ -116,22 +115,15 @@ body {
     opacity: 0.6;
 }
 
-/* Szótagszám + gutter elválasztó vonal.
-   top:0; bottom:0 → a doboz a sor teljes magasságát lefedi (tördelés esetén is),
-   ezért a border-bottom mindig a sor aljára kerül.
-   line-height a szöveg megjelenítéséhez, text-align a pozicionáláshoz —
-   display:flex nélkül, iOS Safari kompatibilis. */
+/* Szótagszám — jobb oldala a gutter-nek */
 #lyric-editor > div::after {
     content: attr(data-syl);
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -80px;
-    width: 58px;
-    line-height: calc(15px * 1.7);
+    left: -48px;
+    width: 26px;
     text-align: right;
-    border-bottom: 1px solid var(--c-border);
     font-size: 11px;
+    line-height: calc(15px * 1.7);
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;
