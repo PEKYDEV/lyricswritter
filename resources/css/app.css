@@ -99,7 +99,7 @@ body {
     min-height: calc(15px * 1.7);
 }
 
-/* Sorszám — bal gutter, teljes sormagasságra nyúlik (mobilon középre igazítva) */
+/* Sorszám — bal gutter, teljes sormagasságra nyúlik (mobilon függőlegesen középen) */
 #lyric-editor > div::before {
     content: attr(data-line);
     position: absolute;
@@ -118,17 +118,17 @@ body {
     opacity: 0.6;
 }
 
-/* Szótagszám + gutter elválasztó — kiterjed a teljes gutter szélességre (0–74px),
-   de szöveget csak a jobb oldalán mutat, a border-bottom csak a gutterben látszik */
+/* Szótagszám + gutter elválasztó.
+   left:-80px + width:58px → a doboz a gutter bal szélétől (0px) a szótagszám
+   jobb széléig (58px) terjed — padding nélkül, hogy box-sizing ne okozzon mobilon
+   csúszást. A border-bottom csak ebben a 58px-es gutter-sávban látszik. */
 #lyric-editor > div::after {
     content: attr(data-syl);
     position: absolute;
     top: 0;
     bottom: 0;
     left: -80px;
-    width: 74px;
-    box-sizing: border-box;
-    padding-right: 16px;
+    width: 58px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
