@@ -331,6 +331,19 @@ export function createEditorApp() {
                 el.innerHTML = html;
             }
             this.ensureLineStructure();
+            // Kurzort az első sor elejére helyezzük, hogy paste azonnal működjön
+            el.focus();
+            const firstDiv = el.querySelector(':scope > div');
+            if (firstDiv) {
+                const range = document.createRange();
+                range.setStart(firstDiv, 0);
+                range.collapse(true);
+                const sel = window.getSelection();
+                if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
         },
 
         clearEditor() {
@@ -435,15 +448,44 @@ export function createEditorApp() {
             }
 
             if (!lineDiv || lineDiv === editorEl) {
-                // Fallback ha nincs div keret
-                lines.forEach((line, i) => {
-                    if (i > 0) {
-                        document.execCommand('insertParagraph', false);
+                // Kurzor az editor root-ján van — az utolsó (vagy egyetlen) div-be illesztünk
+                const divs = Array.from(editorEl.querySelectorAll(':scope > div'));
+                const offset = range.startContainer === editorEl ? range.startOffset : 0;
+                const targetDiv = divs[Math.min(offset, divs.length - 1)] ?? divs[divs.length - 1];
+
+                if (targetDiv) {
+                    if (lines[0]) {
+                        targetDiv.appendChild(document.createTextNode(lines[0]));
                     }
-                    if (line) {
-                        document.execCommand('insertText', false, line);
+                    if (!targetDiv.hasChildNodes()) {
+                        targetDiv.appendChild(document.createElement('br'));
                     }
-                });
+                    let prevDiv = targetDiv;
+                    for (let i = 1; i < lines.length; i++) {
+                        const newDiv = document.createElement('div');
+                        newDiv.appendChild(lines[i] ? document.createTextNode(lines[i]) : document.createElement('br'));
+                        prevDiv.insertAdjacentElement('afterend', newDiv);
+                        prevDiv = newDiv;
+                    }
+                    const finalRange = document.createRange();
+                    const lc = prevDiv.lastChild;
+                    if (lc?.nodeType === Node.TEXT_NODE) {
+                        finalRange.setStart(lc, lc.length);
+                    } else if (lc) {
+                        finalRange.setStartAfter(lc);
+                    } else {
+                        finalRange.setStart(prevDiv, 0);
+                    }
+                    finalRange.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(finalRange);
+                } else {
+                    lines.forEach((line) => {
+                        const div = document.createElement('div');
+                        div.appendChild(line ? document.createTextNode(line) : document.createElement('br'));
+                        editorEl.appendChild(div);
+                    });
+                }
                 this.onEditorInput();
                 return;
             }
