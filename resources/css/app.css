@@ -96,20 +96,21 @@ body {
 
 #lyric-editor > div {
     position: relative;
-    min-height: 1.7em;
+    min-height: calc(15px * 1.7);
 }
 
-/* Sorszám — bal gutter, mindig látható */
+/* Sorszám — bal gutter, teljes sormagasságra nyúlik (mobilon középre igazítva) */
 #lyric-editor > div::before {
     content: attr(data-line);
     position: absolute;
+    top: 0;
+    bottom: 0;
     left: -76px;
     width: 24px;
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     font-size: 10px;
-    /* line-height az editor szövegével azonos abszolút értékre állítva (15px * 1.7),
-       különben a kisebb betűméret miatt pár pixellel feljebb látszana */
-    line-height: calc(15px * 1.7);
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;
@@ -117,15 +118,22 @@ body {
     opacity: 0.6;
 }
 
-/* Szótagszám — jobb oldala a gutter-nek */
+/* Szótagszám + gutter elválasztó — kiterjed a teljes gutter szélességre (0–74px),
+   de szöveget csak a jobb oldalán mutat, a border-bottom csak a gutterben látszik */
 #lyric-editor > div::after {
     content: attr(data-syl);
     position: absolute;
-    left: -48px;
-    width: 26px;
-    text-align: right;
+    top: 0;
+    bottom: 0;
+    left: -80px;
+    width: 74px;
+    box-sizing: border-box;
+    padding-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-bottom: 1px solid var(--c-border);
     font-size: 11px;
-    line-height: calc(15px * 1.7);
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;

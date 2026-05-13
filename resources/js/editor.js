@@ -545,11 +545,70 @@ export function createEditorApp() {
 
         // ====== Billentyűzet ======
         onKeyDown(event) {
-            // Enter és Shift+Enter egyaránt új sort hoz létre (natív viselkedés)
-            // Tab -> 2 szóköz
             if (event.key === 'Tab') {
                 event.preventDefault();
                 document.execCommand('insertText', false, '  ');
+            }
+
+            // Enter: natív helyett direkt DOM-manipuláció, hogy mobilon is
+            // mindig <div> keletkezzék (iOS Safari <br>-t szúrhat be natívan)
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const sel = window.getSelection();
+                if (!sel?.rangeCount) {
+                    return;
+                }
+                if (!sel.isCollapsed) {
+                    sel.deleteFromDocument();
+                }
+
+                const editorEl = this.getEditorEl();
+                const range = sel.getRangeAt(0);
+
+                let lineDiv = range.startContainer;
+                while (lineDiv && lineDiv.parentElement !== editorEl) {
+                    lineDiv = lineDiv.parentElement;
+                }
+                if (!lineDiv || lineDiv === editorEl) {
+                    return;
+                }
+
+                // Kurzor utáni tartalmat kivágjuk és új <div>-be visszük
+                const tailRange = document.createRange();
+                tailRange.setStart(range.startContainer, range.startOffset);
+                tailRange.setEnd(lineDiv, lineDiv.childNodes.length);
+                const tailFragment = tailRange.extractContents();
+
+                const tailHasContent =
+                    tailFragment.textContent.length > 0 ||
+                    Array.from(tailFragment.childNodes).some((n) => n.tagName !== 'BR');
+
+                const newDiv = document.createElement('div');
+                if (tailHasContent) {
+                    newDiv.appendChild(tailFragment);
+                } else {
+                    newDiv.appendChild(document.createElement('br'));
+                }
+
+                if (!lineDiv.hasChildNodes()) {
+                    lineDiv.appendChild(document.createElement('br'));
+                }
+
+                lineDiv.insertAdjacentElement('afterend', newDiv);
+
+                // Kurzort az új sor elejére helyezzük
+                const newRange = document.createRange();
+                const firstChild = newDiv.firstChild;
+                if (firstChild?.nodeType === Node.TEXT_NODE) {
+                    newRange.setStart(firstChild, 0);
+                } else {
+                    newRange.setStart(newDiv, 0);
+                }
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+
+                this.onEditorInput();
             }
         },
 
