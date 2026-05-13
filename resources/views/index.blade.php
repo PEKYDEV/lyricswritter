@@ -1,6 +1,7 @@
 <x-layouts.app>
     <div
-        class="flex h-screen w-screen overflow-hidden"
+        class="flex w-screen overflow-hidden"
+        style="height: 100dvh;"
         x-data="editorApp"
         x-init="init()"
         style="background: var(--c-bg); color: var(--c-text);"
