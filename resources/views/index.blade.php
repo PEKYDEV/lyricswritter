@@ -1,10 +1,9 @@
 <x-layouts.app>
     <div
         class="flex w-screen overflow-hidden"
-        style="height: 100dvh;"
+        style="height: 100dvh; background: var(--c-bg); color: var(--c-text);"
         x-data="editorApp"
         x-init="init()"
-        style="background: var(--c-bg); color: var(--c-text);"
     >
         {{-- Sötét overlay (csak mobilon, ha az oldalsáv nyitva van) --}}
         <div
