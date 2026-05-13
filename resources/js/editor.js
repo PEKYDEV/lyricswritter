@@ -405,23 +405,98 @@ export function createEditorApp() {
                 return;
             }
 
-            // Kijelölt szöveg törlése
-            const selection = window.getSelection();
-            if (selection && !selection.isCollapsed) {
-                document.execCommand('delete', false);
+            const lines = text.split(/\r?\n/);
+            const sel = window.getSelection();
+            if (!sel?.rangeCount) {
+                return;
             }
 
-            // execCommand-dal illesztjük be: a böngésző így helyesen kezeli a div-struktúrát
-            // és új sort (insertParagraph) mindig a megfelelő szinten hoz létre
-            const lines = text.split(/\r?\n/);
-            for (let i = 0; i < lines.length; i++) {
-                if (i > 0) {
-                    document.execCommand('insertParagraph', false);
-                }
-                if (lines[i]) {
-                    document.execCommand('insertText', false, lines[i]);
-                }
+            if (!sel.isCollapsed) {
+                sel.deleteFromDocument();
             }
+
+            // Egysoros beillesztés: insertText elegendő
+            if (lines.length === 1) {
+                if (lines[0]) {
+                    document.execCommand('insertText', false, lines[0]);
+                }
+                this.onEditorInput();
+                return;
+            }
+
+            // Többsoros beillesztés: direkt DOM-manipuláció, hogy mindig <div> keletkezzék
+            // (execCommand('insertParagraph') böngészőnként <p> vagy <br> is lehet)
+            const editorEl = this.getEditorEl();
+            const range = sel.getRangeAt(0);
+
+            let lineDiv = range.startContainer;
+            while (lineDiv && lineDiv.parentElement !== editorEl) {
+                lineDiv = lineDiv.parentElement;
+            }
+
+            if (!lineDiv || lineDiv === editorEl) {
+                // Fallback ha nincs div keret
+                lines.forEach((line, i) => {
+                    if (i > 0) {
+                        document.execCommand('insertParagraph', false);
+                    }
+                    if (line) {
+                        document.execCommand('insertText', false, line);
+                    }
+                });
+                this.onEditorInput();
+                return;
+            }
+
+            // Kurzor utáni tartalmat kivágjuk az aktuális sorból
+            const tailRange = document.createRange();
+            tailRange.setStart(range.startContainer, range.startOffset);
+            tailRange.setEnd(lineDiv, lineDiv.childNodes.length);
+            const tailFragment = tailRange.extractContents();
+            const tailHasText = tailFragment.textContent.length > 0;
+
+            // Első sor szövegét az aktuális sor végéhez fűzzük (kurzor pozíciójára)
+            if (lines[0]) {
+                lineDiv.appendChild(document.createTextNode(lines[0]));
+            }
+            if (!lineDiv.hasChildNodes()) {
+                lineDiv.appendChild(document.createElement('br'));
+            }
+
+            // Többi sor: új <div> elemként szúrjuk be
+            let prevDiv = lineDiv;
+            for (let i = 1; i < lines.length; i++) {
+                const newDiv = document.createElement('div');
+
+                if (lines[i]) {
+                    newDiv.appendChild(document.createTextNode(lines[i]));
+                }
+
+                if (i === lines.length - 1 && tailHasText) {
+                    newDiv.appendChild(tailFragment);
+                }
+
+                if (!newDiv.hasChildNodes()) {
+                    newDiv.appendChild(document.createElement('br'));
+                }
+
+                prevDiv.insertAdjacentElement('afterend', newDiv);
+                prevDiv = newDiv;
+            }
+
+            // Kurzort az utolsó beillesztett sor végére helyezzük
+            const finalRange = document.createRange();
+            const lastChild = prevDiv.lastChild;
+            if (lastChild?.nodeType === Node.TEXT_NODE) {
+                finalRange.setStart(lastChild, lastChild.length);
+            } else if (lastChild) {
+                finalRange.setStartAfter(lastChild);
+            } else {
+                finalRange.setStart(prevDiv, 0);
+            }
+            finalRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(finalRange);
 
             this.onEditorInput();
         },
