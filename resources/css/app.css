@@ -88,9 +88,14 @@ body {
     color: var(--c-text);
     background: var(--c-bg);
     caret-color: var(--c-caret);
-    /* Bal gutter: sorszám + szótagszám + elválasztó vonal */
+    /* Bal gutter: sorszám + szótagszám + elválasztó vonal a szöveg előtt */
     padding-left: 80px;
-    background-image: linear-gradient(to right, transparent 74px, var(--c-border) 74px, var(--c-border) 75px, transparent 75px);
+    background-image: linear-gradient(
+        to right,
+        transparent 74px,
+        var(--c-border) 74px 75px,
+        transparent 75px
+    );
     background-attachment: local;
 }
 
@@ -99,31 +104,39 @@ body {
     min-height: calc(15px * 1.7);
 }
 
-/* Sorszám — bal gutter, mindig látható */
+/* Gutter háttér + sorszám + vízszintes elválasztó (csak a gutter szélességéig) */
 #lyric-editor > div::before {
     content: attr(data-line);
     position: absolute;
-    left: -76px;
-    width: 24px;
-    text-align: right;
+    left: -80px;
+    top: 0;
+    bottom: 0;
+    width: 74px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-left: 4px;
+    padding-right: 46px;
     font-size: 10px;
-    line-height: calc(15px * 1.7);
+    line-height: 1;
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;
     user-select: none;
-    opacity: 0.6;
+    border-bottom: 1px solid var(--c-border);
 }
 
-/* Szótagszám — jobb oldala a gutter-nek */
+/* Szótagszám — tördelésnél vertikálisan középre igazítva */
 #lyric-editor > div::after {
     content: attr(data-syl);
     position: absolute;
     left: -48px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 26px;
     text-align: right;
     font-size: 11px;
-    line-height: calc(15px * 1.7);
+    line-height: 1;
     color: var(--c-faint);
     font-family: 'JetBrains Mono', monospace;
     pointer-events: none;
